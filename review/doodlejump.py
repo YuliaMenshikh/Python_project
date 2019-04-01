@@ -4,6 +4,34 @@ import random
 import sys
 
 class StrawberryJump:
+    FIELD_X_MIN = -25
+    FIELD_X_MAX = 825
+    MAX_MOVEMENT_RIGHT = 15
+    MAX_MOVEMENT_LEFT = -15
+    RIGHT_DIRECTION = 0
+    LEFT_DIRECTION = 1
+    DOWN_DIRECTION = 1
+    UP_DIRECTION = 0
+    DIFFERENCE = 200
+    CHECK_DIFFERENCE = 600
+    JUMP = 15
+    SPRING_JUMP = 40
+    PLATFORM_SPEED = 7
+    MONSTER_SPEED = 5
+    MONSTER_SPEED_UP = 2
+    MAX_MONSTER_OFFSET = 20
+    MOVE_CAM = 10
+    GREEN_PLATFORM = 0
+    BLUE_PLATFORM = 1
+    RED_PLATFORM = 2
+    PLATFORM_X_MIN = 0
+    PLATFORM_X_MAX = 700
+    MONSTER_X_MIN = 0
+    MONSTER_X_MAX = 720
+    MONSTER_1 = 1
+    MONSTER_2 = 2
+    MONSTER_3 = 3
+
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         pygame.font.init()
@@ -17,47 +45,47 @@ class StrawberryJump:
         self.cam = 0
         self.jump = 0
         self.gravity = 0
-        self.move = 0
+        self.movement = 0
         self.isRed = 0
         self.font = pygame.font.SysFont("Arial", 25)
         self.sc = pygame.image.load("images/sc.png").convert_alpha()
-        self.greenPlatform = pygame.image.load("images/green.png").convert_alpha()
-        self.bluePlatform = pygame.image.load("images/blue.png").convert_alpha()
-        self.redPlatform = pygame.image.load("images/red.png").convert_alpha()
-        self.redPlatform_1 = pygame.image.load("images/red_1.png").convert_alpha()
-        self.playerRight = pygame.image.load("images/right1.png").convert_alpha()
-        self.playerRight_1 = pygame.image.load("images/right2.png").convert_alpha()
-        self.playerLeft = pygame.image.load("images/left1.png").convert_alpha()
-        self.playerLeft_1 = pygame.image.load("images/left2.png").convert_alpha()
-        self.playerRight_red = pygame.image.load("images/right1_red.png").convert_alpha()
-        self.playerRight_1_red = pygame.image.load("images/right2_red.png").convert_alpha()
-        self.playerLeft_red = pygame.image.load("images/left1_red.png").convert_alpha()
-        self.playerLeft_1_red = pygame.image.load("images/left2_red.png").convert_alpha()
+        self.green_platform = pygame.image.load("images/green.png").convert_alpha()
+        self.blue_platform = pygame.image.load("images/blue.png").convert_alpha()
+        self.red_platform = pygame.image.load("images/red.png").convert_alpha()
+        self.red_platform_1 = pygame.image.load("images/red_1.png").convert_alpha()
+        self.player_right = pygame.image.load("images/right1.png").convert_alpha()
+        self.player_right_1 = pygame.image.load("images/right2.png").convert_alpha()
+        self.player_left = pygame.image.load("images/left1.png").convert_alpha()
+        self.player_left_1 = pygame.image.load("images/left2.png").convert_alpha()
+        self.player_right_red = pygame.image.load("images/right1_red.png").convert_alpha()
+        self.player_right_1_red = pygame.image.load("images/right2_red.png").convert_alpha()
+        self.player_left_red = pygame.image.load("images/left1_red.png").convert_alpha()
+        self.player_left_1_red = pygame.image.load("images/left2_red.png").convert_alpha()
         self.spring = pygame.image.load("images/spring.png").convert_alpha()
         self.spring_1 = pygame.image.load("images/spring_1.png").convert_alpha()
         self.monster1 = pygame.image.load("images/monster1.png").convert_alpha()
         self.monster2 = pygame.image.load("images/monster2.png").convert_alpha()
         self.monster3 = pygame.image.load("images/monster3.png").convert_alpha()
 
-    def Move(self):
+    def move(self):
         """движение по оси X"""
         key = pygame.key.get_pressed()
 
         if key[K_RIGHT]:
-            if self.move < 15:
-                self.move += 1
-            self.direction = 0
+            if self.movement < self.MAX_MOVEMENT_RIGHT:
+                self.movement += 1
+            self.direction = self.RIGHT_DIRECTION
         elif key[K_LEFT]:
-            if self.move > -15:
-                self.move -= 1
-            self.direction = 1
+            if self.movement > self.MAX_MOVEMENT_LEFT:
+                self.movement -= 1
+            self.direction = self.LEFT_DIRECTION
         else:
-            if self.move > 0:
-                self.move -= 1
-            elif self.move < 0:
-                self.move += 1
+            if self.movement > 0:
+                self.movement -= 1
+            elif self.movement < 0:
+                self.movement += 1
 
-    def Physics(self):
+    def physics(self):
         """падение/прыжок"""
         if not self.jump:
             self.coordY += self.gravity
@@ -66,84 +94,64 @@ class StrawberryJump:
             self.coordY -= self.jump
             self.jump -= 1
 
-    def SideControl(self):
-        if self.coordX > 825:
-            self.coordX = -25
-        elif self.coordX < -25:
-            self.coordX = 825
+    def side_control(self):
+        if self.coordX > self.FIELD_X_MAX:
+            self.coordX = self.FIELD_X_MIN
+        elif self.coordX < self.FIELD_X_MIN:
+            self.coordX = self.FIELD_X_MAX
 
-    def Player(self):
-        """передвижение и прорисовка игрока"""
-        self.SideControl()
-        self.Move()
-        self.Physics()
+    def draw_red_player(self):
+        if not self.direction:
+            if self.jump:
+                self.screen.blit(self.player_right_1_red, (self.coordX, self.coordY - self.cam))
+            else:
+                self.screen.blit(self.player_right_red, (self.coordX, self.coordY - self.cam))
+        else:
+            if self.jump:
+                self.screen.blit(self.player_left_1_red, (self.coordX, self.coordY - self.cam))
+            else:
+                self.screen.blit(self.player_left_red, (self.coordX, self.coordY - self.cam))
+        self.isRed -= 2
 
-        self.coordX += self.move
-        if self.coordY - self.cam <= 200:
-            self.cam -= 10
+    def draw_player(self):
+        if not self.direction:
+            if self.jump:
+                self.screen.blit(self.player_right_1, (self.coordX, self.coordY - self.cam))
+            else:
+                self.screen.blit(self.player_right, (self.coordX, self.coordY - self.cam))
+        else:
+            if self.jump:
+                self.screen.blit(self.player_left_1, (self.coordX, self.coordY - self.cam))
+            else:
+                self.screen.blit(self.player_left, (self.coordX, self.coordY - self.cam))
+
+    def player(self):
+        """передвижение игрока"""
+        self.side_control()
+        self.move()
+        self.physics()
+
+        self.coordX += self.movement
+        if self.coordY - self.cam <= self.DIFFERENCE:
+            self.cam -= self.MOVE_CAM
         
         if (self.isRed):
-            if not self.direction:
-                if self.jump:
-                    self.screen.blit(self.playerRight_1_red, (self.coordX, self.coordY - self.cam))
-                else:
-                    self.screen.blit(self.playerRight_red, (self.coordX, self.coordY - self.cam))
-            else:
-                if self.jump:
-                    self.screen.blit(self.playerLeft_1_red, (self.coordX, self.coordY - self.cam))
-                else:
-                    self.screen.blit(self.playerLeft_red, (self.coordX, self.coordY - self.cam))
-            self.isRed -= 2
+            self.draw_red_player()
         else:
-            if not self.direction:
-                if self.jump:
-                  self.screen.blit(self.playerRight_1, (self.coordX, self.coordY - self.cam))
-                else:
-                    self.screen.blit(self.playerRight, (self.coordX, self.coordY - self.cam))
-            else:
-                if self.jump:
-                    self.screen.blit(self.playerLeft_1, (self.coordX, self.coordY - self.cam))
-                else:
-                    self.screen.blit(self.playerLeft, (self.coordX, self.coordY - self.cam))
+            self.draw_player()
 
-    def updatePlatforms(self):
-        """прорисовка платформ и генерация новых, генерация новых пружин"""
+    def check_platforms(self):
+        """генерация новых платформ и пружин"""
         for p in self.platforms:
-            rect = pygame.Rect(p[0], p[1], self.greenPlatform.get_width() - 15, self.greenPlatform.get_height() - 5)
-            position = pygame.Rect(self.coordX, self.coordY, self.playerRight.get_width() - 10, self.playerRight.get_height())
-            if rect.colliderect(position) and self.gravity and self.coordY < (p[1] - self.cam):
-                if p[2] != 2:
-                    self.jump = 15
-                    self.gravity = 0
-                else:
-                    p[-1] = 1
-            if p[2] == 0:
-                self.screen.blit(self.greenPlatform, (p[0], p[1] - self.cam))
-            elif p[2] == 1:
-                if p[-1] == 1:
-                    p[0] += 7
-                    if p[0] > 700:
-                        p[-1] = 0
-                else:
-                    p[0] -= 7
-                    if p[0] <= 0:
-                        p[-1] = 1
-                self.screen.blit(self.bluePlatform, (p[0], p[1] - self.cam))
-            elif p[2] == 2:
-                if not p[3]:
-                    self.screen.blit(self.redPlatform, (p[0], p[1] - self.cam))
-                else:
-                    self.screen.blit(self.redPlatform_1, (p[0], p[1] - self.cam))
-
             check = self.platforms[1][1] - self.cam
-            if check > 600:
+            if check > self.CHECK_DIFFERENCE:
                 platform = random.randint(0, 1000)
                 if platform < 800:
-                    platform = 0
+                    platform = self.GREEN_PLATFORM
                 elif platform < 900:
-                    platform = 1
+                    platform = self.BLUE_PLATFORM
                 else:
-                    platform = 2
+                    platform = self.RED_PLATFORM
 
                 self.platforms.append([random.randint(0, 700), self.platforms[-1][1] - 50, platform, 0])
                 coords = self.platforms[-1]
@@ -153,40 +161,58 @@ class StrawberryJump:
                 self.platforms.pop(0)
                 self.score += 100
 
-    def drawSprings(self):
+    def draw_platform(self):
+        """прорисовка платформ"""
+        for p in self.platforms:
+            if p[2] == self.GREEN_PLATFORM:
+                self.screen.blit(self.green_platform, (p[0], p[1] - self.cam))
+            elif p[2] == self.BLUE_PLATFORM:
+                self.screen.blit(self.blue_platform, (p[0], p[1] - self.cam))
+            elif p[2] == self.RED_PLATFORM:
+                if not p[3]:
+                    self.screen.blit(self.red_platform, (p[0], p[1] - self.cam))
+                else:
+                    self.screen.blit(self.red_platform_1, (p[0], p[1] - self.cam))
+
+    def update_platforms(self):
+        """обновление платформ"""
+        for p in self.platforms:
+            rect = pygame.Rect(p[0], p[1], self.green_platform.get_width() - 15, self.green_platform.get_height() - 5)
+            position = pygame.Rect(self.coordX, self.coordY, self.player_right.get_width() - 10, self.player_right.get_height())
+            if rect.colliderect(position) and self.gravity and self.coordY < (p[1] - self.cam):
+                if p[2] != self.RED_PLATFORM:
+                    self.jump = self.JUMP
+                    self.gravity = 0
+                else:
+                    p[-1] = 1
+            if p[2] == self.BLUE_PLATFORM:
+                if p[-1] == self.RIGHT_DIRECTION:
+                    p[0] += self.PLATFORM_SPEED
+                    if p[0] > self.PLATFORM_X_MAX:
+                        p[-1] = self.LEFT_DIRECTION
+                else:
+                    p[0] -= self.PLATFORM_SPEED
+                    if p[0] <= self.PLATFORM_X_MIN:
+                        p[-1] = self.RIGHT_DIRECTION
+        self.draw_platform()
+        self.check_platforms()
+
+    def draw_springs(self):
         """прорисовка пружин"""
         for spring in self.springs:
             if spring[-1]:
                 self.screen.blit(self.spring_1, (spring[0], spring[1] - self.cam))
             else:
                 self.screen.blit(self.spring, (spring[0], spring[1] - self.cam))
-            position = pygame.Rect(self.coordX, self.coordY, self.playerRight.get_width(), self.playerRight.get_height())
+            position = pygame.Rect(self.coordX, self.coordY, self.player_right.get_width(), self.player_right.get_height())
             rect = pygame.Rect(spring[0], spring[1], self.spring.get_width() - 5, self.spring.get_height())
             if rect.colliderect(position):
-                self.jump = 40
-                self.cam -= 100
+                self.jump = self.SPRING_JUMP
+                self.cam -= 10 * self.MOVE_CAM
 
-    def drawMonster(self):
-        """передвижение, генерация и прорисовка монстров"""
+    def draw_monster(self):
+        """прорисовка монстров"""
         for m in self.monsters:
-            if m[-1] == 1:
-                m[0] += 5
-                if m[0] > 720:
-                    m[-1] = 0
-            else:
-                m[0] -= 5
-                if m[0] <= 0:
-                    m[-1] = 1
-
-            if m[3] == 1:
-                m[2] += 2
-                if m[2] > 20:
-                    m[3] = 0
-            else:
-                m[2] -= 2
-                if m[2] < -20:
-                    m[3] = 1
-
             if m[4] == 1:
                 self.screen.blit(self.monster1, (m[0], m[1] - self.cam - m[2]))
                 rect = pygame.Rect(m[0], m[1], self.monster1.get_width() - 5, self.monster1.get_height())
@@ -196,51 +222,81 @@ class StrawberryJump:
             else:
                 self.screen.blit(self.monster3, (m[0], m[1] - self.cam - m[2]))
                 rect = pygame.Rect(m[0], m[1], self.monster3.get_width() - 5, self.monster3.get_height())
-
-            position = pygame.Rect(self.coordX, self.coordY, self.playerRight.get_width(), self.playerRight.get_height())
+            position = pygame.Rect(self.coordX, self.coordY, self.player_right.get_width(),
+                                   self.player_right.get_height())
             if rect.colliderect(position):
                 self.isRed = 60
-            
+
+    def generate_monster(self):
+        """генерация монстров"""
+        for m in self.monsters:
             check = self.monsters[0][1] - self.cam
             if check > 600:
                 monst = random.randint(0, 300)
                 if monst < 100:
-                    monst = 1
+                    monst = self.MONSTER_1
                 elif monst < 200:
-                    monst = 2
+                    monst = self.MONSTER_2
                 else:
-                    monst = 3
+                    monst = self.MONSTER_3
                 self.monsters.append([random.randint(0, 600), self.monsters[-1][1] - 700, 0, 0, monst, 1])
                 self.monsters.pop(0)
 
-    def generateMonsters(self):
+    def move_monster(self):
+        """передвижение монстров"""
+        for m in self.monsters:
+            if m[-1] == self.RIGHT_DIRECTION:
+                m[0] += self.MONSTER_SPEED
+                if m[0] > self.MONSTER_X_MAX:
+                    m[-1] = self.LEFT_DIRECTION
+            else:
+                m[0] -= self.MONSTER_SPEED
+                if m[0] <= self.MONSTER_X_MIN:
+                    m[-1] = self.RIGHT_DIRECTION
+
+            if m[3] == self.DOWN_DIRECTION:
+                m[2] += self.MONSTER_SPEED_UP
+                if m[2] > self.MAX_MONSTER_OFFSET:
+                    m[3] = self.UP_DIRECTION
+            else:
+                m[2] -= self.MONSTER_SPEED_UP
+                if m[2] < -self.MAX_MONSTER_OFFSET:
+                    m[3] = self.DOWN_DIRECTION
+
+    def update_monster(self):
+        """передвижение, генерация монстров"""
+        self.move_monster()
+        self.draw_monster()
+        self.generate_monster()
+
+    def generate_monsters(self):
         monst = random.randint(0, 300)
         if monst < 100:
-            monst = 1
+            monst = self.MONSTER_1
         elif monst < 200:
-            monst = 2
+            monst = self.MONSTER_2
         else:
-            monst = 3
-        self.monsters.append([0, random.randint(0,400), 0, 0, monst, 1])
+            monst = self.MONSTER_3
+        self.monsters.append([0, random.randint(0, 400), 0, 0, monst, 1])
 
-    def generatePlatforms(self):
+    def generate_platforms(self):
         on = 600
         while on > -100:
             x = random.randint(0, 700)
             platform = random.randint(0, 1000)
             if platform < 800:
-                platform = 0
+                platform = self.GREEN_PLATFORM
             elif platform < 900:
-                platform = 1
+                platform = self.BLUE_PLATFORM
             else:
-                platform = 2
+                platform = self.RED_PLATFORM
             self.platforms.append([x, on, platform, 0])
             on -= 60
     
     def run(self):
         clock = pygame.time.Clock()
-        self.generatePlatforms()
-        self.generateMonsters()
+        self.generate_platforms()
+        self.generate_monsters()
         while True:
             self.screen.fill((255, 255, 255))
             clock.tick(60)
@@ -254,15 +310,15 @@ class StrawberryJump:
                 self.springs = []
                 self.platforms = [[400, 500, 0, 0]]
                 self.monsters = []
-                self.generatePlatforms()
-                self.generateMonsters()
+                self.generate_platforms()
+                self.generate_monsters()
                 self.coordX = 400
                 self.coordY = 300
             self.screen.blit(self.sc, [0, 0])
-            self.drawSprings()
-            self.updatePlatforms()
-            self.drawMonster()
-            self.Player()
+            self.draw_springs()
+            self.update_platforms()
+            self.update_monster()
+            self.player()
             self.screen.blit(self.font.render(str(self.score), -1, (255, 255, 255)), (25, 25))
             pygame.display.flip()
 

@@ -3,6 +3,8 @@ from pygame.locals import *
 import random
 import sys
 
+#добавлены константы и декопозирован код
+
 class StrawberryJump:
     FIELD_X_MIN = -25
     FIELD_X_MAX = 825

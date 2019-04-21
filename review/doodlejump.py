@@ -2,34 +2,7 @@ import pygame
 from pygame.locals import *
 import random
 import sys
-import os
-
-#добавлены константы и декопозирован код
-
-class Images:
-    def __init__(self):
-        self.font = pygame.font.SysFont("Arial", 25)
-        self.sc = pygame.image.load("images/sc.png").convert_alpha()
-        self.green_platform = self.load_images("green.png")
-        self.blue_platform = self.load_images("blue.png")
-        self.red_platform = self.load_images("red.png")
-        self.red_platform_1 = self.load_images("red_1.png")
-        self.player_right = self.load_images("right1.png")
-        self.player_right_1 = self.load_images("right2.png")
-        self.player_left = self.load_images("left1.png")
-        self.player_left_1 = self.load_images("left2.png")
-        self.player_right_red = self.load_images("right1_red.png")
-        self.player_right_1_red = self.load_images("right2_red.png")
-        self.player_left_red = self.load_images("left1_red.png")
-        self.player_left_1_red = self.load_images("left2_red.png")
-        self.spring = self.load_images("spring.png")
-        self.spring_1 = self.load_images("spring_1.png")
-        self.monster1 = self.load_images("monster1.png")
-        self.monster2 = self.load_images("monster2.png")
-        self.monster3 = self.load_images("monster3.png")
-
-    def load_images(self, image_name):
-        return pygame.image.load(os.path.join('images', image_name)).convert_alpha()
+from images import Images
 
 class StrawberryJump:
     FIELD_X_MIN = -25
@@ -59,10 +32,17 @@ class StrawberryJump:
     MONSTER_1 = 1
     MONSTER_2 = 2
     MONSTER_3 = 3
+    SCORE_PLACE = (25, 25)
+    PLAYER_WIDTH = 10
+    PLATFORM_WIDTH = 15
+    PLATFORM_HIGHT = 5
+    SPRING_WIDTH = 5
+    MONSTER_WIDTH = 5
 
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         pygame.font.init()
+        self.font = pygame.font.SysFont("Arial", 25)
         self.score = 0
         self.direction = 0
         self.coordX = 400
@@ -187,8 +167,8 @@ class StrawberryJump:
     def update_platforms(self):
         """обновление платформ"""
         for p in self.platforms:
-            rect = pygame.Rect(p[0], p[1], self.images.green_platform.get_width() - 15, self.images.green_platform.get_height() - 5)
-            position = pygame.Rect(self.coordX, self.coordY, self.images.player_right.get_width() - 10, self.images.player_right.get_height())
+            rect = pygame.Rect(p[0], p[1], self.images.green_platform.get_width() - self.PLATFORM_WIDTH, self.images.green_platform.get_height() - self.PLATFORM_HIGHT)
+            position = pygame.Rect(self.coordX, self.coordY, self.images.player_right.get_width() - self.PLAYER_WIDTH, self.images.player_right.get_height())
             if rect.colliderect(position) and self.gravity and self.coordY < (p[1] - self.cam):
                 if p[2] != self.RED_PLATFORM:
                     self.jump = self.JUMP
@@ -215,7 +195,7 @@ class StrawberryJump:
             else:
                 self.screen.blit(self.images.spring, (spring[0], spring[1] - self.cam))
             position = pygame.Rect(self.coordX, self.coordY, self.images.player_right.get_width(), self.images.player_right.get_height())
-            rect = pygame.Rect(spring[0], spring[1], self.images.spring.get_width() - 5, self.images.spring.get_height())
+            rect = pygame.Rect(spring[0], spring[1], self.images.spring.get_width() - self.SPRING_WIDTH, self.images.spring.get_height())
             if rect.colliderect(position):
                 self.jump = self.SPRING_JUMP
                 self.cam -= 10 * self.MOVE_CAM
@@ -223,15 +203,15 @@ class StrawberryJump:
     def draw_monster(self):
         """прорисовка монстров"""
         for m in self.monsters:
-            if m[4] == 1:
+            if m[4] == self.MONSTER_1:
                 self.screen.blit(self.images.monster1, (m[0], m[1] - self.cam - m[2]))
-                rect = pygame.Rect(m[0], m[1], self.images.monster1.get_width() - 5, self.images.monster1.get_height())
-            elif m[4] == 2:
+                rect = pygame.Rect(m[0], m[1], self.images.monster1.get_width() - self.MONSTER_WIDTH, self.images.monster1.get_height())
+            elif m[4] == self.MONSTER_2:
                 self.screen.blit(self.images.monster2, (m[0], m[1] - self.cam - m[2]))
-                rect = pygame.Rect(m[0], m[1], self.images.monster2.get_width() - 5, self.images.monster2.get_height())
+                rect = pygame.Rect(m[0], m[1], self.images.monster2.get_width() - self.MONSTER_WIDTH, self.images.monster2.get_height())
             else:
                 self.screen.blit(self.images.monster3, (m[0], m[1] - self.cam - m[2]))
-                rect = pygame.Rect(m[0], m[1], self.images.monster3.get_width() - 5, self.images.monster3.get_height())
+                rect = pygame.Rect(m[0], m[1], self.images.monster3.get_width() - self.MONSTER_WIDTH, self.images.monster3.get_height())
             position = pygame.Rect(self.coordX, self.coordY, self.images.player_right.get_width(),
                                    self.images.player_right.get_height())
             if rect.colliderect(position):
@@ -329,5 +309,5 @@ class StrawberryJump:
             self.update_platforms()
             self.update_monster()
             self.player()
-            self.screen.blit(self.images.font.render(str(self.score), -1, (255, 255, 255)), (25, 25))
+            self.screen.blit(self.font.render(str(self.score), -1, (255, 255, 255)), self.SCORE_PLACE)
             pygame.display.flip()
